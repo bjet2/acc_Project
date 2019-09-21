@@ -2,6 +2,8 @@
 # Used with Arduino program Processing_accel
 # This program was originally used with Processing language
 #    before I got to frustrated with its unexpected quirks
+#Working on statup problem ....
+# ???
 
 """
 	Program to read data supplied by Arduino over serial port

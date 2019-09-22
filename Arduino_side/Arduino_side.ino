@@ -18,7 +18,9 @@ void setup() {
   digitalWrite(12,LOW);
   
   Serial.begin(9600); // start serial communication
+  Serial.flush();
   Wire.begin();       // start I2C communication
+  Wire.flush();
 
   // Send settings to accel_0_port
   Wire.beginTransmission(ADXL345); // Start communicating with the device 

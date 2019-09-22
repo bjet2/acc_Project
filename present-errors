@@ -1,32 +1,8 @@
-Present Error 
+Present Work 
 
+Data input has been solved for both python and Processing
+Will uses Processing to refine equations and continue to learn processing
+to refine program
 
-Should look like
-b'-23.00,46.00,279.00,8.91\r\n'
--23.00,46.00,279.00,8.91
-['-23.00', '46.00', '279.00', '8.91']
--23.0
+need to learn matrices methods and classes before I go much further 
 
-
-------------------
-(program exited with code: 0)
-Press return to continue
-
-But often returns this:
-
-b'054.21\r\n'
-054.21
-['054.21']
-54.21
-b',280.00,553.80\r\n'
-,280.00,553.80
-['', '280.00', '553.80']
-Traceback (most recent call last):
-  File "hello.py", line 36, in <module>
-    ax = float(data[0])
-ValueError: could not convert string to float: 
-
-
-------------------
-(program exited with code: 1)
-Press return to continue

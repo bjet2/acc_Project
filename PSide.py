@@ -16,9 +16,12 @@
 import serial										# Serial library
 arduinoSerialData = serial.Serial('/dev/ttyACM0',9600)			
 
-arduinoSerialData.reset_input_buffer()
+arduinoSerialData.reset_input_buffer()					# attempts to flush out old data from serial buffer on Python side
+print("data waiting = ",arduinoSerialData.inWaiting())	# attempts to flush out old data from serial buffer on Python side
+														# attempts to flush out old data from serial buffer on Python side
 while (arduinoSerialData.inWaiting()>0):			# attempts to flush out old data from serial buffer on Python side
-		pass										# suspect must flush output buffer for arduino as well
+		myData = arduinoSerialData.readline()
+		#pass										# suspect must flush output buffer for arduino as well
 at_beginning = True									# this is a poor bit of programming until I can figure out
 													# how to clear serial buffers
 

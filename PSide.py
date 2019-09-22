@@ -16,42 +16,30 @@
 import serial										# Serial library
 arduinoSerialData = serial.Serial('/dev/ttyACM0',9600)			
 
-arduinoSerialData.reset_input_buffer()					# attempts to flush out old data from serial buffer on Python side
-print("data waiting = ",arduinoSerialData.inWaiting())	# attempts to flush out old data from serial buffer on Python side
-														# attempts to flush out old data from serial buffer on Python side
-while (arduinoSerialData.inWaiting()>0):			# attempts to flush out old data from serial buffer on Python side
-		myData = arduinoSerialData.readline()
-		#pass										# suspect must flush output buffer for arduino as well
-at_beginning = True									# this is a poor bit of programming until I can figure out
-													# how to clear serial buffers
+at_beginning = False								# used to clear buffers of old data 
+													# will be set to True if "0.0,0.0,0.0,0.0" string is received
 
 for i in range(0,100):								# for loop to limit time program runs
-	if (i>20):										# used at end of loop to discard data that is in serial buffer before start
-		at_beginning=False
-	
+		
 	myData = "0.0,0.0,0.0,0.0"						# initialize data string
-													# do nothing ...wait for data from Arduino (threading here??)
-	while (arduinoSerialData.inWaiting()==0):
+													
+	while (arduinoSerialData.inWaiting()==0):		# do nothing ...wait for data from Arduino (threading here??)
 		pass										
 	
-	data_valid = True
+	data_valid = True								# data will be tested. If data is not expected set to False and data is ignored
 	myData = arduinoSerialData.readline()			# get the data string
+	
 	try:
 		myData = myData.decode('utf-8')				# not an issue in Python2 but in Python3 this decode must be done
+													# see https://stackoverflow.com/questions/31529421/weird-output-value-bvalue-r-n-python-serial-read
 	except ValueError:
 		data_valid = False
-		print("Error in reading serial data: Data Point ignored")
-	
-													# see https://stackoverflow.com/questions/31529421/weird-output-value-bvalue-r-n-python-serial-read
 	else:
 		myData = myData.strip()						# strip all non-character and white spaces from right side of myData
 		data = myData.split(",")					# Split data using "," as delimiter
-		#print(data)								# Print the split data
 		if( len(data) != 4):						# check to see if 4 pieces of data were received
-			print("Error: 4 data points were not recieved Data point ignored")
 			data_valid = False
 		else:
-	
 			ax = 0.0									# convert data string into floats
 			ay = 0.0
 			az = 0.0
@@ -77,14 +65,11 @@ for i in range(0,100):								# for loop to limit time program runs
 			except ValueError:
 				data_valid = False	
 			
-			if(data_valid == False):
-				print("Error: data points were convertable to floats ... Data point ignored")
-			else:
-				if( t > 4.0 and at_beginning == True):
-					print("Serial port not flushed???? Data discarded")
-					data_valid = False				
+			if(data_valid == True and at_beginning == False and ax==0.0 and ay == 0.0 and az ==0.0 and t==0.0):
+				at_beginning = True
+				print("Start of new data found ....")
 		
-		if (data_valid == True) :
+		if (data_valid == True and at_beginning == True) :
 			print(ax," ",ay," ",az," ",t)				# display acceleration ax as test
 arduinoSerialData.close()
 

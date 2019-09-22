@@ -29,21 +29,21 @@ void setup() {
   Wire.write(8);                    // (8dec -> 0000 1000 binary) Bit D3 High for measuring enable 
   Wire.endTransmission();
   delay(100);                       // delay to insure registers are set ... 
-  
-  // Set the register to be read in ADXL345 to 0x32
-  // delay is to insure ADXL345 register is set before 
-  // Initial data point is sent
-  Wire.beginTransmission(ADXL345); 
-  Wire.write(0x32); // Set the Register to be read 
-  Wire.endTransmission(false);
-  delay(100);   
 
-  // This line is expected by Python code 
-  // Signals the beginning of new data
-  // Delay is added to be cautious, but likely can be removed
-  Serial.println("0.0,0.0,0.0,0.0");
-  delay(100);   
-  
+  for(int i=0;i<10;i++){
+      // Set the register to be read in ADXL345 to 0x32
+      // delay is to insure ADXL345 register is set before 
+      // Initial data point is sent
+      Wire.beginTransmission(ADXL345); 
+      Wire.write(0x32); // Set the Register to be read 
+      Wire.endTransmission(false);
+      delay(100);   
+    
+      // This line is expected by Python code 
+      // Signals the beginning of new data
+      // Delay is added to be cautious, but likely can be removed
+      Serial.println("0.0,0.0,0.0,0.0");
+  }
   digitalWrite(13,HIGH);
   
 

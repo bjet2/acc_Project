@@ -84,9 +84,9 @@ void draw(){
        az_tot = az_tot+az;
        cycles++;
      }else if (cycles == 50){
-       ax_tot = ax_tot/50;
-       ay_tot = ay_tot/50;
-       az_tot = az_tot/50;
+       ax_tot = 0;//ax_tot/50;
+       ay_tot = 0;//ay_tot/50;
+       az_tot = 0;//az_tot/50;
        println("computing averages");
        cycles++;
      }else{
@@ -101,8 +101,8 @@ void draw(){
       vy = vy_i+(ay+ay_i)/2*(time_a-time_i)*1000;
       vz = vz_i+(az+az_i)/2*(time_a-time_i)*1000;
       
-      println(" v = ",vx,",",vy,",",vz," , ",time_a/1000);
-      println(" ");
+      //println(" v = ",vx,",",vy,",",vz," , ",time_a/1000);
+      //println(" ");
   
       mx = (ax-ax_i)/(time_a-time_i)*1000;
       my = (ay-ay_i)/(time_a-time_i)*1000;
@@ -120,8 +120,8 @@ void draw(){
       y = y_i+(vy+vy_i)/2*(time_a-time_i)*1000;
       z = z_i+(vz+vz_i)/2*(time_a-time_i)*1000;
       
-      println(" d = ",x,",",y,",",z," , ",time_a/1000);
-      println(" ");
+      //println(" d = ",x,",",y,",",z," , ",time_a/1000);
+      //println(" ");
       
       // visually display data ... red is a, green is v, blue is displacement 
       background(255);
@@ -138,7 +138,7 @@ void draw(){
       fill(0,255,0);
       
       fill(0,255,255);
-      ellipse((400+(x/100000)),(220-(y/10000)),10,10);    // 100000 factor to keep on screen
+      ellipse((400+(x/1000000)),(220-(y/100000)),10,10);    // 1000000 factor to keep on screen
       fill(0,255,0);
       
       

@@ -19,7 +19,7 @@ arduinoSerialData = serial.Serial('/dev/ttyACM0',9600)
 at_beginning = False								# used to clear buffers of old data 
 													# will be set to True if "0.0,0.0,0.0,0.0" string is received
 
-for i in range(0,100):								# for loop to limit time program runs
+for i in range(0,1000):								# for loop to limit time program runs
 		
 	myData = "0.0,0.0,0.0,0.0"						# initialize data string
 													
@@ -64,12 +64,17 @@ for i in range(0,100):								# for loop to limit time program runs
 				t = float(data[3])
 			except ValueError:
 				data_valid = False	
-			
+						
 			if(data_valid == True and at_beginning == False and ax==0.0 and ay == 0.0 and az ==0.0 and t==0.0):
 				at_beginning = True
 				print("Start of new data found ....")
 		
 		if (data_valid == True and at_beginning == True) :
-			print(ax," ",ay," ",az," ",t)				# display acceleration ax as test
+			#print(ax/255," ",ay/255," ",az/255," ",t)				# display acceleration ax in N/kg as test
+																				# data not calibrated here
+																				# this will be done on arduino side
+			mag_a = ((ax/255*9.8)**2+(ay/255*9.8)**2+(az/255*9.8)**2)**(0.5)	# test to see if calibration is close
+			print(mag_a)														# success! 9.8 to -9.8 for all three axies
+																	
 arduinoSerialData.close()
 

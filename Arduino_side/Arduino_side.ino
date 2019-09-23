@@ -65,16 +65,16 @@ void loop() {
   accelz = float(Wire.read()|Wire.read() << 8); 
 
   // send serial data in form "ax,ay,az,t"
-  Serial.print(accelx);
+  Serial.print((accelx+10)*.927273);          // calibration scale = 0.97273 and offset +10
   Serial.print(',');
-  Serial.print(accely);
+  Serial.print((accely-20)*.9239113);         // see above example
   Serial.print(',');
-  Serial.print(accelz);
+  Serial.print((accelz-29.5)*1.017964);       // see above example
   unsigned long pTime = millis();
   float t= float(pTime)/1000;
   Serial.print(',');
   Serial.println(t);      // NOTE: println very important for Python program to have serial data with end line
-  delay(100);
+  //delay(10);
 }
 
   

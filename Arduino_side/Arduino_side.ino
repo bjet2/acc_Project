@@ -17,7 +17,7 @@ void setup() {
   digitalWrite(13,LOW);
   digitalWrite(12,LOW);
   
-  Serial.begin(9600); // start serial communication
+  Serial.begin(115200); // start serial communication
 
   Wire.begin();       // start I2C communication
 

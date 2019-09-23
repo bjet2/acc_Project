@@ -14,7 +14,10 @@
 
 # create serial object called arduinoSerialData
 import serial										# Serial library
-arduinoSerialData = serial.Serial('/dev/ttyACM0',9600)			
+import math											# Math library
+arduinoSerialData = serial.Serial('/dev/ttyACM0',115200)	
+
+t_i = 0.0		
 
 at_beginning = False								# used to clear buffers of old data 
 													# will be set to True if "0.0,0.0,0.0,0.0" string is received
@@ -64,17 +67,41 @@ for i in range(0,1000):								# for loop to limit time program runs
 				t = float(data[3])
 			except ValueError:
 				data_valid = False	
+			
+			if (t==t_i):											# check to see if data is in fact new
+				#print('"  "  "')									# " " " added to monitor to indicate data is duplicate
+				data_valid = False									# maxiumum data rate seems to be 100 Hz
+			t_i=t
 						
 			if(data_valid == True and at_beginning == False and ax==0.0 and ay == 0.0 and az ==0.0 and t==0.0):
 				at_beginning = True
 				print("Start of new data found ....")
-		
+
+
 		if (data_valid == True and at_beginning == True) :
-			#print(ax/255," ",ay/255," ",az/255," ",t)				# display acceleration ax in N/kg as test
+			angle_in_xy_plane = -10.0
+			#print("\n a =",ax/255*9.8," ",ay/255*9.8," ",az/255*9.8)			# display acceleration ax in N/kg as test
 																				# data not calibrated here
 																				# this will be done on arduino side
-			mag_a = ((ax/255*9.8)**2+(ay/255*9.8)**2+(az/255*9.8)**2)**(0.5)	# test to see if calibration is close
-			print(mag_a)														# success! 9.8 to -9.8 for all three axies
+			mag_a = ((ax/255*9.8)**2+(ay/255*9.8)**2+(az/255*9.8)**2)**(0.5)	# magnitude for angle calculations
+			if (mag_a != 0):
+				angle_from_z_axis= math.acos((az/255*9.8)/mag_a)
+				mag_a_xy_plane = ((ax/255*9.8)**2+(ay/255*9.8)**2)**(0.5)		# magnitude in x-y plane only
+				
+				if (mag_a_xy_plane == 0):
+					angle_in_xy_plane = 0										# actually undefined but this will do
+				else:
+					if(ax==0):
+						if(ay>0):
+							angle_in_xy_plane = 3.141592654
+						else:
+							angle_in_xy_plane = -3.141592654
+					else:
+						angle_in_xy_plane = math.atan(ay/ax)
+			
+				#print(" angle from vertical", angle_from_z_axis*180/3.141592654)		# success! 9.8 to -9.8 for all three axies
+				print(" axy mag =",mag_a_xy_plane, " angle in x-y plane", angle_in_xy_plane*180/3.141592654)
+			
 																	
 arduinoSerialData.close()
 

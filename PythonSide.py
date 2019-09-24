@@ -15,6 +15,7 @@
 # create serial object called arduinoSerialData
 import serial										# Serial library
 import math											# Math library
+#from visual import *								# vpython library
 arduinoSerialData = serial.Serial('/dev/ttyACM0',115200)	
 
 t_i = 0.0		
@@ -22,7 +23,7 @@ t_i = 0.0
 at_beginning = False								# used to clear buffers of old data 
 													# will be set to True if "0.0,0.0,0.0,0.0" string is received
 
-for i in range(0,1000):								# for loop to limit time program runs
+for i in range(0,10000):								# for loop to limit time program runs
 		
 	myData = "0.0,0.0,0.0,0.0"						# initialize data string
 													
@@ -99,8 +100,13 @@ for i in range(0,1000):								# for loop to limit time program runs
 					else:
 						angle_in_xy_plane = math.atan(ay/ax)
 			
-				#print(" angle from vertical", angle_from_z_axis*180/3.141592654)		# success! 9.8 to -9.8 for all three axies
-				print(" axy mag =",mag_a_xy_plane, " angle in x-y plane", angle_in_xy_plane*180/3.141592654)
+				
+				#print(" axy mag =",mag_a_xy_plane, " angle in x-y plane", angle_in_xy_plane*180/3.141592654)
+				if (mag_a > 10.3 or mag_a<9.3):
+					print("G = ", mag_a, " angle from vertical", angle_from_z_axis*180/3.141592654,"Moving")		# success! 9.8 to -9.8 for all three axiesprint("movement")
+				else:
+					print("G = ", mag_a, " angle from vertical", angle_from_z_axis*180/3.141592654)		# success! 9.8 to -9.8 for all three axiesprint("movement")
+
 			
 																	
 arduinoSerialData.close()

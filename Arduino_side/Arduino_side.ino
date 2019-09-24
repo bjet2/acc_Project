@@ -7,7 +7,7 @@
  
 
 const int ADXL345 = 0x53; // The ADXL345 sensor I2C address
-
+bool calibrate = false;
 
 void setup() {
   // two pins for troubleshooting 13 (onboard LED) will go high at end of set up
@@ -64,17 +64,27 @@ void loop() {
   accely = float(Wire.read()|Wire.read() << 8); 
   accelz = float(Wire.read()|Wire.read() << 8); 
 
-  // send serial data in form "ax,ay,az,t"
-  Serial.print((accelx+10)*.927273);          // calibration scale = 0.97273 and offset +10
-  Serial.print(',');
-  Serial.print((accely-20)*.9239113);         // see above example
-  Serial.print(',');
-  Serial.print((accelz-29.5)*1.017964);       // see above example
-  unsigned long pTime = millis();
-  float t= float(pTime)/1000;
-  Serial.print(',');
-  Serial.println(t);      // NOTE: println very important for Python program to have serial data with end line
-  //delay(10);
+  if(calibrate){
+      // send serial data in form "ax,ay,az"
+    Serial.print("CALIBRATION DATA:");   
+    Serial.print((accelx));          
+    Serial.print(',');
+    Serial.print((accely));         
+    Serial.print(',');
+    Serial.println((accelz));       
+  }else{
+    // send serial data in form "ax,ay,az,t"
+    Serial.print((accelx+9.5)*.935870);          // see calibration.py for formulas and numerical data
+    Serial.print(',');
+    Serial.print((accely-18)*.930660);         // see above example
+    Serial.print(',');
+    Serial.print((accelz-36)*1.015939);       // see above example
+    unsigned long pTime = millis();
+    float t= float(pTime)/1000;
+    Serial.print(',');
+    Serial.println(t);      // NOTE: println very important for Python program to have serial data with end line
+    //delay(10);
+  }
 }
 
   

@@ -88,18 +88,18 @@ void loop() {
     Serial.println((accelz));       
   }else{
     // send serial data in form "ax,ay,az,t"
-//    Serial.print((accelx+9.5)*.935870);          // see calibration.py for formulas and numerical data
-//    Serial.print(',');
-//    Serial.print((accely-18)*.930660);         // see above example
-//    Serial.print(',');
-//    Serial.print((accelz-36)*1.015939);       // see above example
+    Serial.print((accelx+9.5)*.935870);          // see calibration.py for formulas and numerical data
+    Serial.print(',');
+    Serial.print((accely-18)*.930660);         // see above example
+    Serial.print(',');
+    Serial.print((accelz-36)*1.015939);       // see above example
     unsigned long pTime = millis();
     float t= float(pTime)/1000;
-//    Serial.print(',');
-//    Serial.println(t);      // NOTE: println very important for Python program to have serial data with end line
+    Serial.print(',');
+    Serial.print(t);      // NOTE: println very important for Python program to have serial data with end line
 
     Wire.beginTransmission(MPU_addr);
-    Wire.write(0x3B);  // starting with register 0x3B (ACCEL_XOUT_H)
+    Wire.write(0x1D);  // starting with register 0x3B (ACCEL_XOUT_H)
     delay(100);
     error_code = Wire.endTransmission();
   
@@ -107,21 +107,16 @@ void loop() {
       Serial.print("loop Error from gyro = "); Serial.println(error_code);
     }
     
-    Wire.requestFrom(MPU_addr,14,true);  // request a total of 14 registers
-    accelx=Wire.read()<<8|Wire.read();  // 0x3B (ACCEL_XOUT_H) & 0x3C (ACCEL_XOUT_L)    
-    accely=Wire.read()<<8|Wire.read();  // 0x3D (ACCEL_YOUT_H) & 0x3E (ACCEL_YOUT_L)
-    accelz=Wire.read()<<8|Wire.read();  // 0x3F (ACCEL_ZOUT_H) & 0x40 (ACCEL_ZOUT_L)
-    Tmp=Wire.read()<<8|Wire.read();  // 0x41 (TEMP_OUT_H) & 0x42 (TEMP_OUT_L)
-    gx=Wire.read()<<8|Wire.read();  // 0x43 (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
-    gy=Wire.read()<<8|Wire.read();  // 0x45 (GYRO_YOUT_H) & 0x46 (GYRO_YOUT_L)
-    gz=Wire.read()<<8|Wire.read();  // 0x47 (GYRO_ZOUT_H) & 0x48 (GYRO_ZOUT_L)
-    Serial.print("gyro raw data:");   
+    Wire.requestFrom(MPU_addr,6,true);  // request a total of 6 registers
+    gx=Wire.read()<<8|Wire.read();  // 0x1D (GYRO_XOUT_H) & 0x44 (GYRO_XOUT_L)
+    gy=Wire.read()<<8|Wire.read();  // 
+    gz=Wire.read()<<8|Wire.read();  // 
+    Serial.print("     gyro raw data:");   
     Serial.print(gx);          
     Serial.print(',');
     Serial.print(gy);         
     Serial.print(',');
     Serial.println(gz);       
-    delay(100);
   }
 }
 

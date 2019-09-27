@@ -1,5 +1,7 @@
 #include <Wire.h>
 void conv2Byte2Signed16(uint8_t LSB,uint8_t MSB, int16_t * dest);
+int8_t i2cReadBytes(uint8_t i2c_address, uint8_t reg,uint8_t *data,uint8_t len);
+
 /* Accelerometers to send data to Processing
  *  
  *  I2C address ... ADXL345 = 0x53
@@ -53,11 +55,11 @@ void setup() {
 void loop() {
   
   float accelx, accely, accelz;
-  // ********************* alternate coding for ********************
-  // accelx = float(Wire.read()|Wire.read() << 8); 
-  // *************************************************************
-  //  int16_t ax_data;
-  //  uint8_t LSB,MSB;
+  int16_t ax_data;
+  uint8_t raw_data[4]={0,0,0,0};
+  uint8_t error_code,MSB,LSB;
+
+  
 
   // Set the register to be read in ADXL345 to 0x32
   Wire.beginTransmission(ADXL345); 
@@ -65,20 +67,15 @@ void loop() {
   Wire.endTransmission(false);
  
   // Read 6 registers total, each axis value is stored in 2 registers
-  Wire.requestFrom(ADXL345, 6, true); 
+  Wire.requestFrom(ADXL345, 2, true); 
 
-  // ********************* alternate code for ********************
-  // accelx = float(Wire.read()|Wire.read() << 8); 
-  // *************************************************************
-  //  MSB = Wire.read();
-  //  LSB = Wire.read();
-  //  conv2Byte2Signed16(LSB, MSB, ax_data);
-  //  accelx = (float(ax_data)+9.5)*.935870; 
-  // *************************************************************
+  accelx = float(Wire.read()|Wire.read() << 8);
+  accelx = (accelx+9.5)*.935870; 
   
-  accelx = float(Wire.read()|Wire.read() << 8); 
-  accely = float(Wire.read()|Wire.read() << 8); 
-  accelz = float(Wire.read()|Wire.read() << 8); 
+  error_code = i2cReadBytes(ADXL345, 0x32 , *raw_data,4);
+ 
+  accely = float(raw_data[1]|raw_data[0] << 8); 
+  accelz = float(raw_data[3]|raw_data[2] << 8); 
 
   if(calibrate){
       // send serial data in form "ax,ay,az"
@@ -103,15 +100,28 @@ void loop() {
   }
 }
 
-// ********************* alternate code for ********************
-// accelx = float(Wire.read()|Wire.read() << 8); 
-// *************************************************************
-//void conv2Byte2Signed16(uint8_t LSB,uint8_t MSB, int16_t * dest)
-//{
-//  *dest = 0;
-//  *dest = (int16_t)LSB;
-//  *dest |= ((int16_t)MSB << 8);
-//}
+void conv2Byte2Signed16(uint8_t LSB,uint8_t MSB, int16_t * dest)
+{
+  *dest = 0;
+  *dest = (int16_t)LSB;
+  *dest |= ((int16_t)MSB << 8);
+}
+
+int8_t i2cReadBytes(uint8_t i2c_address, uint8_t reg,uint8_t *data,uint8_t len)
+{
+  Wire.beginTransmission(i2c_address);
+  Wire.write(reg);
+  uint8_t error = Wire.endTransmission(i2c_address);
+  Wire.requestFrom(i2c_address,len);
+  uint8_t i = 0;
+  while(Wire.available() & i<len)
+  {
+    data[i]= Wire.read();
+    ++i;
+  }
+  return error;
+}
+
 
 
   

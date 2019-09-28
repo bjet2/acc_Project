@@ -1,5 +1,5 @@
-#include <Wire.h>
-void conv2Byte2Signed16(uint8_t LSB,uint8_t MSB, int16_t * dest);
+
+
 /* Accelerometers to send data to Processing
  *  
  *  I2C address ... ADXL345 = 0x53
@@ -7,111 +7,108 @@ void conv2Byte2Signed16(uint8_t LSB,uint8_t MSB, int16_t * dest);
  */
  
 
-const int ADXL345 = 0x53; // The ADXL345 sensor I2C address
-bool calibrate = false;
+#include "Bayne.h"
+#include <Wire.h>
 
+void blink_error(int error_num=10);
+void startADXL345();
+uint8_t ADXL345 = 0x53; // The ADXL345 sensor I2C address
+/*************************************************************************************************************/
 void setup() {
-  // two pins for troubleshooting 13 (onboard LED) will go high at end of set up
-  // pin 12 is not used at present
-  pinMode(13,OUTPUT);
-  pinMode(12,OUTPUT);
-  digitalWrite(13,LOW);
-  digitalWrite(12,LOW);
-  
+  uint8_t error = 0;
+  blink_error(error);
   Serial.begin(115200); // start serial communication
-
   Wire.begin();       // start I2C communication
-
-
-  // Send settings to DDXL345 
-  Wire.beginTransmission(ADXL345);  // Start communicating with the device 
-  Wire.write(0x2D);                 // Access/ talk to POWER_CTL Register - 0x2D
-                                    // Enable measurement
-  Wire.write(8);                    // (8dec -> 0000 1000 binary) Bit D3 High for measuring enable 
-  Wire.endTransmission();
-  delay(100);                       // delay to insure registers are set ... 
-
+  startADXL345();
   for(int i=0;i<10;i++){
-      // Set the register to be read in ADXL345 to 0x32
-      // delay is to insure ADXL345 register is set before 
-      // Initial data point is sent
-      Wire.beginTransmission(ADXL345); 
-      Wire.write(0x32); // Set the Register to be read 
-      Wire.endTransmission(false);
-      delay(100);   
-    
-      // This line is expected by Python code 
+      // This repeated line of is "0.0,0.0,0.0,0.0" is expected by Python code 
       // Signals the beginning of new data
-      // Delay is added to be cautious, but likely can be removed
       Serial.println("0.0,0.0,0.0,0.0");
   }
-  digitalWrite(13,HIGH);
-  
-
+}
+/*************************************************************************************************************/
+void loop() {
+  uint8_t ADXL345 = 0x53, ADXL345_data_register = 0x32;
+  Bayne b = Bayne();
+  uint8_t raw_data[6];
+  float accel[3];
+  float scale[3] = {0.935870 , 0.930660, 1.015939};
+  float offset[3] = {9.5,-18,-36};
+  b.i2cReadBytes(ADXL345, ADXL345_data_register , raw_data,6);
+  for(int i=0;i<3;i++){
+    int j,k;
+    j = i*2;
+    k=j+1;
+    accel[i] = float(raw_data[j]|raw_data[k]<<8);
+    accel[i] = (accel[i] + offset[i])*scale[i];
+    accel[i] = accel[i]*9.8/255;
+    Serial.print(accel[i]); Serial.print(',');
+  }
+  unsigned long pTime = millis();
+  float t= float(pTime)/1000;
+  Serial.println(t);      // NOTE: println very important for Python program to have serial data with end line
+  delay(100);
 }
 
-void loop() {
+/*************************************************************************************************************/
+void startADXL345(){
+  uint8_t ADXL345 = 0x53;
+  uint8_t error;
+  Wire.beginTransmission(ADXL345);  // Start communicating with the device 
+  Wire.write(0x2D);                 // Access/ talk to POWER_CTL Register - 0x2D
+                                  // Enable measurement
+  Wire.write(8);                    // (8dec -> 0000 1000 binary) Bit D3 High for measuring enable 
+  Wire.endTransmission();
+  if(error !=0){
+    Serial.print("1 Error starting ADXL345 = "); Serial.println(error);
+  }
+  Wire.beginTransmission(ADXL345);  // Start communicating with the device 
+  Wire.write(0x32);                 // register to read
+  Wire.endTransmission();
+  if(error !=0){
+    Serial.print("2 Error starting ADXL345 = "); Serial.println(error);
+  }
+}
+/*************************************************************************************************************/
+void blink_error(int error_num=10){
   
-  float accelx, accely, accelz;
-  // ********************* alternate coding for ********************
-  // accelx = float(Wire.read()|Wire.read() << 8); 
-  // *************************************************************
-  //  int16_t ax_data;
-  //  uint8_t LSB,MSB;
-
-  // Set the register to be read in ADXL345 to 0x32
-  Wire.beginTransmission(ADXL345); 
-  Wire.write(0x32); // Set the Register to be read 
-  Wire.endTransmission(false);
- 
-  // Read 6 registers total, each axis value is stored in 2 registers
-  Wire.requestFrom(ADXL345, 6, true); 
-
-  // ********************* alternate code for ********************
-  // accelx = float(Wire.read()|Wire.read() << 8); 
-  // *************************************************************
-  //  MSB = Wire.read();
-  //  LSB = Wire.read();
-  //  conv2Byte2Signed16(LSB, MSB, ax_data);
-  //  accelx = (float(ax_data)+9.5)*.935870; 
-  // *************************************************************
+  // Error code for builtin LED on pin 13. Can be used to give information about 
+  // program errors without plugging in to computer. Useful for troubleshooting 
+  // robot during competition.
+  // Default error 10 = catch all error 
+  // numbers up to 10 can be defined by programmer as needed. Anything above 10
+  // or below 0 will be changed to default error of 10
+  // Will display number on serial port above 10 (and below 1) for greater detail
   
-  accelx = float(Wire.read()|Wire.read() << 8); 
-  accely = float(Wire.read()|Wire.read() << 8); 
-  accelz = float(Wire.read()|Wire.read() << 8); 
-
-  if(calibrate){
-      // send serial data in form "ax,ay,az"
-    Serial.print("CALIBRATION DATA:");   
-    Serial.print((accelx));          
-    Serial.print(',');
-    Serial.print((accely));         
-    Serial.print(',');
-    Serial.println((accelz));       
+  if (error_num ==0){
+    digitalWrite(13,LOW);
   }else{
-    // send serial data in form "ax,ay,az,t"
-    Serial.print((accelx+9.5)*.935870);          // see calibration.py for formulas and numerical data
-    Serial.print(',');
-    Serial.print((accely-18)*.930660);         // see above example
-    Serial.print(',');
-    Serial.print((accelz-36)*1.015939);       // see above example
-    unsigned long pTime = millis();
-    float t= float(pTime)/1000;
-    Serial.print(',');
-    Serial.println(t);      // NOTE: println very important for Python program to have serial data with end line
-    //delay(10);
+    if(error_num < 0 | error_num > 10) error_num = 10;
+    pinMode(13,OUTPUT);
+    digitalWrite(13,LOW);
+    while(1==1){
+      for(int i=0;i<error_num;i++){
+        digitalWrite(13,HIGH);
+        delay(200);
+        digitalWrite(13,LOW);
+        delay(200);
+      }
+      delay(2000);
+      if (Serial){
+         // if serial port is connected send error number. This number can be 
+         Serial.print("Error = ");Serial.println(error_num);
+      }
+    }
   }
 }
 
-// ********************* alternate code for ********************
-// accelx = float(Wire.read()|Wire.read() << 8); 
-// *************************************************************
-//void conv2Byte2Signed16(uint8_t LSB,uint8_t MSB, int16_t * dest)
-//{
-//  *dest = 0;
-//  *dest = (int16_t)LSB;
-//  *dest |= ((int16_t)MSB << 8);
-//}
+
+
+
+
+
+
+
 
 
   

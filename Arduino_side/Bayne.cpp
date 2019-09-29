@@ -3,8 +3,9 @@
 
 /*************************************************************************************************************/
 // constructor for class
-Bayne::Bayne()
-{}
+Bayne::Bayne(){
+  _oldTime = 0.0;  
+}
 /*************************************************************************************************************/
 // method to read bytes of data into a matrix for manipulation
 void Bayne::i2cReadBytes(uint8_t i2c_address, uint8_t reg,uint8_t  *data,uint8_t len)
@@ -109,5 +110,12 @@ void Bayne::startMPU3050(){
       Serial.print("Setupt Error from gyro = "); Serial.println(error_code);
     }
   }
+}
+/*************************************************************************************************************/
+float Bayne::changeInTime(float newTime){
+  float change;
+  change = newTime-_oldTime;
+  _oldTime = newTime;
+  return change;
 }
 /*************************************************************************************************************/

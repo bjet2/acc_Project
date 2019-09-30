@@ -138,9 +138,8 @@ unsigned long Bayne::changeInTime(unsigned long newTime){
 void Bayne::sumGyro(float *gyro){
   for(int i=0;i<3;i++){
     _gyroSums[i]=_gyroSums[i]+gyro[i]*float(_change)/1000;
-    //Serial.print(_gyroSums[i]);Serial.print(",");
+    Serial.print(_gyroSums[i]);Serial.print(",");
   }
-  //Serial.println();
 }
 
 /*************************************************************************************************************/
@@ -161,10 +160,5 @@ void Bayne::accelAvg(float *accel_smoothed, float *accel){
       temp[j]=temp[j]+_accel_old[i][j];
     }
     accel_smoothed[j] = temp[j]/15.0;
-    Serial.print(accel_smoothed[j]);Serial.print(",");
-  } 
-  Serial.println(); 
-  
-  
-  
+  }    
 }

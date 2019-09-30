@@ -45,7 +45,7 @@ void loop() {
   float scale[3] = {0.935870 , 0.930660, 1.015939};
   float offset[3] = {9.5,-18,-36};
   float gyro[3];
-  float gyro_offset[3]={450.0,170.0,70.0};// factors I got that work ... also off by factor of 2 {-450.0,-170.0,-70.0}
+  float gyro_offset[3]={442.5,93.04,75.99};// factors I got that work ... also off by factor of 2 {-450.0,-170.0,-70.0}
   unsigned long deltaTime;
   
 
@@ -62,8 +62,12 @@ void loop() {
     accel[i] = float(raw_data[j]|raw_data[k]<<8);
     accel[i] = (accel[i] + offset[i])*scale[i];
     accel[i] = accel[i]*9.8/255;
+    //Serial.print(accel[i]); Serial.print(",");
   }
   b.accelAvg(accel_smoothed,accel);
+  for(int i=0;i<3;i++){
+       Serial.print(accel_smoothed[i]*10); Serial.print(",");
+  }
   //*******************************************************************************
   // Coding for Gyro: gyro  
   //*******************************************************************************
@@ -75,31 +79,32 @@ void loop() {
     k=j+1;
     gyro[i] = float(raw_data[k]|raw_data[j]<<8);
     gyro[i] = (gyro[i] + gyro_offset[i])/131;   // see notes as to 131 scaling ... linked to full scale setting
-                                                  
-    //Serial.print(","); Serial.print(gyro[i]);
+    Serial.print(gyro[i]); Serial.print(",");
   }
-  unsigned long t = millis();
-  // float t= float(pTime)/1000;
-  deltaTime =b.changeInTime(t);
-  b.sumGyro(gyro);
-  if(deltaTime != 0){
-    for(int i=0;i<3;i++){
-       //Serial.print(accel[i]); Serial.print(",");
-    }
-    for(int i=0;i<3;i++){
-       //Serial.print(gyro[i]); Serial.print(",");
-    }
-    uint8_t check_DLPF_byte ;
-    b.i2cReadOneByte(0x68, 0x16, &check_DLPF_byte );
-    
-    // Serial.println(check_DLPF_byte);  while(1==1){}   // used to check if DLPF byte is correctly set
-    
-    //Serial.println(deltaTime);
-    //Serial.println();
+  unsigned long pTime =  millis();
+  //float t= float(pTime)/1000;
+  deltaTime =b.changeInTime(pTime);
+  Serial.println(deltaTime);
+
+  
+  //b.sumGyro(gyro); // presently prints out data but once corrected will pass data back to main program
+
+  
+
+  // Print serial data string
+  // Disabled until summing problem with gyro sorted out
+  
+//  if(deltaTime != 0){
 //    for(int i=0;i<3;i++){
-//      
+//       Serial.print(accel_smoothed[i]*10); Serial.print(",");
 //    }
-  }
+//    for(int i=0;i<3;i++){
+//       Serial.print(gyro[i]); Serial.print(",");
+//    }
+//    Serial.print("  >>"); Serial.println(deltaTime);
+//    Serial.println();
+//  }
+//  Serial.println();
   
   //*******************************************************************************
   // TODO: Calibrations is rough...redo with more accuracy

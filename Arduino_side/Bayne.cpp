@@ -9,6 +9,11 @@ Bayne::Bayne(){
   for(int i=0;i<3;i++){
     _gyroSums[i] = 0.0;
   }
+  for(int i=0;i<15;i++){
+    for(int j=0;j<3;j++){
+      _accel_old[i][j]=0.0;
+    }
+  }
   
 }
 /*************************************************************************************************************/
@@ -96,7 +101,7 @@ void Bayne::i2cReadOneByte(uint8_t i2c_address, uint8_t reg, uint8_t *data ){
 void Bayne::startMPU3050(){
   uint8_t i2cAddress = MPU3050_ADDRESS;
   uint8_t DLPFRegAddress = 0x16;
-  uint8_t MPU3050_lowpass_188HZ= 0x01, MPU3050_range_PM500 = 0x01;
+  uint8_t MPU3050_lowpass_188HZ= 0x01, MPU3050_range_PM500 = 0x00;
   uint8_t data=0x00;
   uint8_t config_DLPF_byte,check_DLPF_byte ;
   
@@ -133,9 +138,33 @@ unsigned long Bayne::changeInTime(unsigned long newTime){
 void Bayne::sumGyro(float *gyro){
   for(int i=0;i<3;i++){
     _gyroSums[i]=_gyroSums[i]+gyro[i]*float(_change)/1000;
-    Serial.print(_gyroSums[i]);Serial.print(",");
+    //Serial.print(_gyroSums[i]);Serial.print(",");
   }
-  Serial.println();
+  //Serial.println();
 }
 
 /*************************************************************************************************************/
+void Bayne::accelAvg(float *accel_smoothed, float *accel){
+  // shift accel data into _accel_old. _accel_old[0][x] is new data
+  float temp[3]= {0.0,0.0,0.0};
+  for(int i=0;i<(15-1);i++){
+    for(int j=0;j<3;j++){
+      _accel_old[i+1][j]=_accel_old[i][j];
+    }
+  }
+  for(int j=0;j<3;j++){
+    _accel_old[0][j]=accel[j];
+  }
+  // calculate new running average
+  for(int j=0;j<3;j++){
+    for(int i=0;i<15;i++){
+      temp[j]=temp[j]+_accel_old[i][j];
+    }
+    accel_smoothed[j] = temp[j]/15.0;
+    Serial.print(accel_smoothed[j]);Serial.print(",");
+  } 
+  Serial.println(); 
+  
+  
+  
+}

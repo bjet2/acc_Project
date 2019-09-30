@@ -41,10 +41,11 @@ void loop() {
   uint8_t MPU3050 = 0x68, MPU3050_data_register = 0x1D;
   uint8_t raw_data[6];
   float accel[3];
+  float accel_smoothed[3];
   float scale[3] = {0.935870 , 0.930660, 1.015939};
   float offset[3] = {9.5,-18,-36};
   float gyro[3];
-  float gyro_offset[3]={-450.0,-170.0,-70.0};
+  float gyro_offset[3]={450.0,170.0,70.0};// factors I got that work ... also off by factor of 2 {-450.0,-170.0,-70.0}
   unsigned long deltaTime;
   
 
@@ -62,6 +63,7 @@ void loop() {
     accel[i] = (accel[i] + offset[i])*scale[i];
     accel[i] = accel[i]*9.8/255;
   }
+  b.accelAvg(accel_smoothed,accel);
   //*******************************************************************************
   // Coding for Gyro: gyro  
   //*******************************************************************************
@@ -72,7 +74,8 @@ void loop() {
     j = i*2;
     k=j+1;
     gyro[i] = float(raw_data[k]|raw_data[j]<<8);
-    gyro[i] = (gyro[i] - gyro_offset[i])/131;   // see notes as to 131 scaling ... linked to full scale setting
+    gyro[i] = (gyro[i] + gyro_offset[i])/131;   // see notes as to 131 scaling ... linked to full scale setting
+                                                  
     //Serial.print(","); Serial.print(gyro[i]);
   }
   unsigned long t = millis();

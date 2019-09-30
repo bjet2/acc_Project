@@ -15,6 +15,7 @@ class Bayne
 {
   private:
     unsigned long _oldTime, _change;
+    float _accel_old[15][3];
     float _gyroSums[3];
   public:
     Bayne();
@@ -25,5 +26,6 @@ class Bayne
     void startMPU3050();
     unsigned long changeInTime(unsigned long newTime);
     void sumGyro(float *gyro);
+    void accelAvg(float *accel_smoothed, float *accel);
 };
 #endif

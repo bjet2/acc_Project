@@ -14,7 +14,8 @@
 class Bayne
 {
   private:
-    float _oldTime;
+    unsigned long _oldTime, _change;
+    float _gyroSums[3];
   public:
     Bayne();
     void i2cReadBytes(uint8_t i2c_address, uint8_t reg,uint8_t  *data,uint8_t len);
@@ -22,6 +23,7 @@ class Bayne
     void blink_error(int error_num);
     void startADXL345();
     void startMPU3050();
-    float changeInTime(float newTime);
+    unsigned long changeInTime(unsigned long newTime);
+    void sumGyro(float *gyro);
 };
 #endif

@@ -45,7 +45,8 @@ void loop() {
   float offset[3] = {9.5,-18,-36};
   float gyro[3];
   float gyro_offset[3]={-450.0,-170.0,-70.0};
-  float deltaTime;
+  unsigned long deltaTime;
+  
 
 
   //*******************************************************************************
@@ -74,18 +75,22 @@ void loop() {
     gyro[i] = (gyro[i] - gyro_offset[i])/131;   // see notes as to 131 scaling ... linked to full scale setting
     //Serial.print(","); Serial.print(gyro[i]);
   }
-  unsigned long pTime = millis();
-  float t= float(pTime)/1000;
+  unsigned long t = millis();
+  // float t= float(pTime)/1000;
   deltaTime =b.changeInTime(t);
+  b.sumGyro(gyro);
   if(deltaTime != 0){
     for(int i=0;i<3;i++){
-       Serial.print(accel[i]); Serial.print(",");
+       //Serial.print(accel[i]); Serial.print(",");
     }
     for(int i=0;i<3;i++){
-       Serial.print(gyro[i]); Serial.print(",");
+       //Serial.print(gyro[i]); Serial.print(",");
     }
-    Serial.println(deltaTime,5);
+    //Serial.println(deltaTime);
     //Serial.println();
+//    for(int i=0;i<3;i++){
+//      
+//    }
   }
   
   //*******************************************************************************

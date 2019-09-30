@@ -4,7 +4,12 @@
 /*************************************************************************************************************/
 // constructor for class
 Bayne::Bayne(){
-  _oldTime = 0.0;  
+  _oldTime = 0; 
+  _change = 0; 
+  for(int i=0;i<3;i++){
+    _gyroSums[i] = 0.0;
+  }
+  
 }
 /*************************************************************************************************************/
 // method to read bytes of data into a matrix for manipulation
@@ -112,10 +117,19 @@ void Bayne::startMPU3050(){
   }
 }
 /*************************************************************************************************************/
-float Bayne::changeInTime(float newTime){
-  float change;
-  change = newTime-_oldTime;
+unsigned long Bayne::changeInTime(unsigned long newTime){
+  unsigned long change;
+  _change = newTime-_oldTime;
   _oldTime = newTime;
-  return change;
+  return _change;
 }
+/*************************************************************************************************************/
+void Bayne::sumGyro(float *gyro){
+  for(int i=0;i<3;i++){
+    _gyroSums[i]=_gyroSums[i]+gyro[i]*float(_change)/1000;
+    Serial.print(_gyroSums[i]);Serial.print(",");
+  }
+  Serial.println();
+}
+
 /*************************************************************************************************************/

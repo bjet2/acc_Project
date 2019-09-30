@@ -82,7 +82,7 @@ void Bayne::startADXL345(){
 // method to one byte of data
 void Bayne::i2cReadOneByte(uint8_t i2c_address, uint8_t reg, uint8_t *data ){
   
-  Serial.print("Data in = "); Serial.println(*data);
+  //Serial.print("Data in = "); Serial.println(*data);
   Wire.beginTransmission(i2c_address);
   Wire.write(reg);
   uint8_t error = Wire.endTransmission(i2c_address);
@@ -96,21 +96,27 @@ void Bayne::i2cReadOneByte(uint8_t i2c_address, uint8_t reg, uint8_t *data ){
 void Bayne::startMPU3050(){
   uint8_t i2cAddress = MPU3050_ADDRESS;
   uint8_t DLPFRegAddress = 0x16;
-  uint8_t MPU3050_lowpass_188HZ= 1, MPU3050_range_PM500 = 1;
+  uint8_t MPU3050_lowpass_188HZ= 0x01, MPU3050_range_PM500 = 0x01;
   uint8_t data=0x00;
   uint8_t config_DLPF_byte,check_DLPF_byte ;
   
-  Serial.print("In Gyrostartup");
+  //Serial.print("In Gyrostartup");
   i2cReadOneByte(i2cAddress, MPU3050_REG_WHOAMI, &data);
-  Serial.print("Id number = "); Serial.println(data);
+  //Serial.print("Id number = "); Serial.println(data);
   if((data&0x7E) == MPU3050_ADDRESS){                       // mask to find ID from MPU3050_REG_WHOAMI
-    Serial.println("Correct Gyrostartup IDed");
+    //Serial.println("Correct Gyrostartup IDed");
     config_DLPF_byte = (MPU3050_lowpass_188HZ | (MPU3050_range_PM500<<3)) & 0x1F;
       Wire.beginTransmission(i2cAddress);
       Wire.write(DLPFRegAddress);     // First byte is to set the register pointer
       Wire.write(config_DLPF_byte);   // Write the data byte
     int error_code= Wire.endTransmission();
     i2cReadOneByte(i2cAddress, DLPFRegAddress, &check_DLPF_byte );
+
+    // Used this code to confirm DLPF Register is set to 0x09
+//    Serial.print("check DLPF byte = "); Serial.println(config_DLPF_byte,HEX);
+//    Serial.print("check DLPF byte = "); Serial.println(check_DLPF_byte,HEX);
+//    while(1==1){} 
+    
     while(error_code !=0){
       Serial.print("Setupt Error from gyro = "); Serial.println(error_code);
     }

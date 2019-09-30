@@ -86,6 +86,11 @@ void loop() {
     for(int i=0;i<3;i++){
        //Serial.print(gyro[i]); Serial.print(",");
     }
+    uint8_t check_DLPF_byte ;
+    b.i2cReadOneByte(0x68, 0x16, &check_DLPF_byte );
+    
+    // Serial.println(check_DLPF_byte);  while(1==1){}   // used to check if DLPF byte is correctly set
+    
     //Serial.println(deltaTime);
     //Serial.println();
 //    for(int i=0;i<3;i++){

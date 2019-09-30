@@ -1,8 +1,24 @@
-Present Work 
 
-Data input has been solved for both python and Processing
-Will uses Processing to refine equations and continue to learn processing
-to refine program
+THe big goal--> use on a robot
 
-need to learn matrices methods and classes before I go much further 
+I want to hook up a gyro and an accelerometer and have the combined data from this sensors give acceleration, velocity and position for any object they are attached to. To fully understand the process and to grasp the limitations of the sensors themselves, I want to start from the ground up and work out all the code.
 
+I just two sensors will work but just up to a point. Additional data from other sensors can be added refine the output from the two. For example, a second accelerometer for example combined with the first could be used to give changes in orientation to complement the gyro data. Ideally, it could also be used to track the pivot point of the bot. THis data could also be confirmed or corrected by wheel encoders. 
+
+THe point is NOT to have stand alone sensors, but to have each sensor working with the group to give more reliable kinematic data.
+
+TODO:
+
+1) convert where possible float numbers to int which are native to Arduino (faster)
+
+2a) sum method works well but there is an error with the scale (factor of 2) ... want to revisit documantation to understand why. When I turn the gyro 180 degrees the reading is 90.
+
+2b) The numbers seem smooth but I may add a threshold to get rid of random jiggling in the gyros. I am hesitiant to do this however. I would prefer to have the program reset itself if the bot is motionless (a = 9.8) Sensing 9.8 however may be difficult.
+
+3) Want to use the sum method to make a calibration routine at startup. The numbers I have put in are rough and sensitive to temperature. Having a calibration to fine tune the device at startup is a way around this problem. (Most robotic competitions are under 2 minutes so changes in temp will not be a problem if calibration takes place on start up.)
+
+4) Once the gyros are working reliably ...
+
+	find a,v and d
+
+	

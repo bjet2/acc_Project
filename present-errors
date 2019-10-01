@@ -11,13 +11,9 @@ TODO:
 
 1) convert where possible float numbers to int which are native to Arduino (faster)
 
-2A) SUM METHOD WORKS WELL BUT THERE IS AN ERROR WITH THE SCALE (FACTOR OF 2) ... WANT TO REVISIT DOCUMANTATION TO UNDERSTAND WHY. WHEN I TURN THE GYRO 180 DEGREES THE READING IS 90. 
+2c) Change to trapazoidal rule for area for gyroSums
 
-AFTER MUCH HEAD SCRATCHING, BELIEVE THAT THIS MAY BE A WEIRD CALIBRATION ERROR WHEN SHIFTING FROM DIFFERENT FULL SCALE MEASUREMENTS. THIS ACCOUNTS FOR THE FACTOR OF 2 I FOUND IN CALIBRATION. WONDERING HOW THIS COULD IMPACT CODE??? Did get the z axis to read correctly so this may be it. 
-
-2b) The numbers seem smooth but I may add a threshold to get rid of random jiggling in the gyros. I am hesitiant to do this however. I would prefer to have the program reset itself if the bot is motionless (a = 9.8) Sensing 9.8 however may be difficult.
-
-3) Want to use the sum method to make a calibration routine at startup. The numbers I have put in are rough and sensitive to temperature. Having a calibration to fine tune the device at startup is a way around this problem. (Most robotic competitions are under 2 minutes so changes in temp will not be a problem if calibration takes place on start up.)
+3) Self calibration DURING operation ... a = 9.8 check rotation etc.
 
 4) Once the gyros are working reliably ...
 

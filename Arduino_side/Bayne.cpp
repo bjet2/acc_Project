@@ -5,7 +5,8 @@
 // constructor for class
 Bayne::Bayne(){
   _oldTime = 0; 
-  _change = 0; 
+  _change = 0;
+  _sumThreshold=0.5; 
   for(int i=0;i<3;i++){
     _gyroSums[i] = 0.0;
   }
@@ -137,7 +138,13 @@ unsigned long Bayne::changeInTime(unsigned long newTime){
 /*************************************************************************************************************/
 void Bayne::sumGyro(float *gyro){
   for(int i=0;i<3;i++){
-    _gyroSums[i]=_gyroSums[i]+gyro[i]*float(_change)/1000;
+    if(gyro[i]>_sumThreshold |gyro[i]<-_sumThreshold)
+    _gyroSums[i]=_gyroSums[i]+gyro[i]*float(_change)/1000*_change;
+  }
+}
+/*************************************************************************************************************/
+void Bayne::sumGyroPrint(){
+  for(int i=0;i<3;i++){
     Serial.print(_gyroSums[i]);Serial.print(",");
   }
 }

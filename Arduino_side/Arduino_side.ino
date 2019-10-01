@@ -28,7 +28,7 @@ void setup() {
   for(int i=0;i<10;i++){
 //       This repeated line of is "0.0,0.0,0.0,0.0" is expected by Python code 
 //       Signals the beginning of new data
-      Serial.println("0.0,0.0,0.0,0.0");
+      Serial.println("0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0, 0");
   }
 }
 
@@ -45,7 +45,7 @@ void loop() {
   float scale[3] = {0.935870 , 0.930660, 1.015939};
   float offset[3] = {9.5,-18,-36};
   float gyro[3];
-  float gyro_offset[3]={442.5,93.04,75.99};// factors I got that work ... also off by factor of 2 {-450.0,-170.0,-70.0}
+  float gyro_offset[3]={449.5,119.5,70.5};// working well with numbers around {449.5,119.5,70.5}
   unsigned long deltaTime;
   
 
@@ -65,49 +65,39 @@ void loop() {
     //Serial.print(accel[i]); Serial.print(",");
   }
   b.accelAvg(accel_smoothed,accel);
-  for(int i=0;i<3;i++){
-       Serial.print(accel_smoothed[i]*10); Serial.print(",");
-  }
   //*******************************************************************************
-  // Coding for Gyro: gyro  
+  // Coding for Gyro: gyro  and loading serial data
   //*******************************************************************************
-
+  // Get gyro rawdata and offset with rough calibration numbers
+  
   b.i2cReadBytes(MPU3050, MPU3050_data_register , raw_data,6);
   for(int i=0;i<3;i++){
     int j,k;
     j = i*2;
     k=j+1;
     gyro[i] = float(raw_data[k]|raw_data[j]<<8);
-    gyro[i] = (gyro[i] + gyro_offset[i])/131;   // see notes as to 131 scaling ... linked to full scale setting
-    Serial.print(gyro[i]); Serial.print(",");
+    gyro[i] = (gyro[i] + gyro_offset[i])/131/4;   // see notes as to 131 scaling ... linked to full scale setting
+    //Serial.print(gyro[i]); Serial.print(",");
   }
+  // find the time and calculat the change in time in milliseconds
   unsigned long pTime =  millis();
-  //float t= float(pTime)/1000;
   deltaTime =b.changeInTime(pTime);
-  Serial.println(deltaTime);
-
-  
-  //b.sumGyro(gyro); // presently prints out data but once corrected will pass data back to main program
-
-  
-
-  // Print serial data string
-  // Disabled until summing problem with gyro sorted out
-  
-//  if(deltaTime != 0){
-//    for(int i=0;i<3;i++){
-//       Serial.print(accel_smoothed[i]*10); Serial.print(",");
-//    }
-//    for(int i=0;i<3;i++){
-//       Serial.print(gyro[i]); Serial.print(",");
-//    }
-//    Serial.print("  >>"); Serial.println(deltaTime);
-//    Serial.println();
-//  }
-//  Serial.println();
+  // if delta time is not zero ... meaning no new data... print new data stream
+  if(deltaTime != 0){
+    // print the running average for accleration accel_smoothed[3]
+    for(int i=0;i<3;i++){
+       Serial.print(accel_smoothed[i]); Serial.print(",");
+    }
+    // calculate the sum of the gyro movement to find new orientation in degrees for x,y and z in _gyroSums[3]
+    b.sumGyro(gyro); 
+    // print the sumGyro data
+    b.sumGyroPrint();
+    Serial.print(deltaTime); 
+    Serial.println();
+  }
   
   //*******************************************************************************
-  // TODO: Calibrations is rough...redo with more accuracy
+  // TODO: self calibration when a = 9.8 for gyros
   //*******************************************************************************
 }
 

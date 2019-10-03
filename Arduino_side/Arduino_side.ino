@@ -26,9 +26,9 @@ void setup() {
   b.startMPU3050();
   
   for(int i=0;i<10;i++){
-//       This repeated line of is "0.0,0.0,0.0,0.0" is expected by Python code 
+//       This repeated line of is "0.0,0.0,0.0,0.0,0.0,0.0,0.0" is expected by Python code exactly in this form...
 //       Signals the beginning of new data
-      Serial.println("0.0, 0.0, 0.0, 0.0, 0.0, 0.0,0.0, 0");
+      Serial.println("0.0,0.0,0.0,0.0,0.0,0.0,0.0");
   }
 }
 
@@ -41,11 +41,11 @@ void loop() {
   uint8_t MPU3050 = 0x68, MPU3050_data_register = 0x1D;
   uint8_t raw_data[6];
   float accel[3];
-  float accel_smoothed[3];
+
   float scale[3] = {0.935870 , 0.930660, 1.015939};
   float offset[3] = {9.5,-18,-36};
   float gyro[3];
-  float gyro_offset[3]={449.5,119.5,70.5};// working well with numbers around {449.5,119.5,70.5}
+  float gyro_offset[3]={450,119.5,70.5};// working well with numbers around {449.5,119.5,70.5}
   unsigned long deltaTime;
   
 
@@ -53,52 +53,56 @@ void loop() {
   //*******************************************************************************
   // Coding for Accelerometer    accel
   //*******************************************************************************
-
-  b.i2cReadBytes(ADXL345, ADXL345_data_register , raw_data,6);
-  for(int i=0;i<3;i++){
-    int j,k;
-    j = i*2;
-    k=j+1;
-    accel[i] = float(raw_data[j]|raw_data[k]<<8);
-    accel[i] = (accel[i] + offset[i])*scale[i];
-    accel[i] = accel[i]*9.8/255;
-    //Serial.print(accel[i]); Serial.print(",");
-  }
-  b.accelAvg(accel_smoothed,accel);
-  //*******************************************************************************
-  // Coding for Gyro: gyro  and loading serial data
-  //*******************************************************************************
-  // Get gyro rawdata and offset with rough calibration numbers
-  
-  b.i2cReadBytes(MPU3050, MPU3050_data_register , raw_data,6);
-  for(int i=0;i<3;i++){
-    int j,k;
-    j = i*2;
-    k=j+1;
-    gyro[i] = float(raw_data[k]|raw_data[j]<<8);
-    gyro[i] = (gyro[i] + gyro_offset[i])/131/4;   // see notes as to 131 scaling ... linked to full scale setting
-    //Serial.print(gyro[i]); Serial.print(",");
-  }
-  // find the time and calculat the change in time in milliseconds
-  unsigned long pTime =  millis();
-  deltaTime =b.changeInTime(pTime);
-  // if delta time is not zero ... meaning no new data... print new data stream
-  if(deltaTime != 0){
-    // print the running average for accleration accel_smoothed[3]
+  if(b.collectData()){
+    b.i2cReadBytes(ADXL345, ADXL345_data_register , raw_data,6);
     for(int i=0;i<3;i++){
-       Serial.print(accel_smoothed[i]); Serial.print(",");
+      int j,k;
+      j = i*2;
+      k=j+1;
+      accel[i] = float(raw_data[j]|raw_data[k]<<8);
+      accel[i] = (accel[i] + offset[i])*scale[i];
+      accel[i] = accel[i]*9.8/255;
+      //Serial.print(accel[i]); Serial.print(",");
     }
-    // calculate the sum of the gyro movement to find new orientation in degrees for x,y and z in _gyroSums[3]
-    b.sumGyro(gyro); 
-    // print the sumGyro data
-    b.sumGyroPrint();
-    Serial.print(deltaTime); 
-    Serial.println();
-  }
   
-  //*******************************************************************************
-  // TODO: self calibration when a = 9.8 for gyros
-  //*******************************************************************************
+    //*******************************************************************************
+    // Coding for Gyro: gyro  and loading serial data
+    //*******************************************************************************
+    // Get gyro rawdata and offset with rough calibration numbers
+    
+    b.i2cReadBytes(MPU3050, MPU3050_data_register , raw_data,6);
+    for(int i=0;i<3;i++){
+      int j,k;
+      j = i*2;
+      k=j+1;
+      gyro[i] = float(raw_data[k]|raw_data[j]<<8);
+      gyro[i] = (gyro[i] + gyro_offset[i])/131/4;   // see notes as to 131 scaling ... linked to full scale setting
+      //Serial.print(gyro[i]); Serial.print(",");
+    }
+    // find the time and calculat the change in time in milliseconds
+    unsigned long pTime =  millis();
+    deltaTime =b.changeInTime(pTime);
+    // if delta time is not zero ... meaning no new data... print new data stream
+    if(deltaTime != 0){
+      // print the running average for accleration accel_smoothed[3]
+      b.accelAvg(accel);
+      b.avgAccelPrint();
+      // calculate the sum of the gyro movement anf print this
+      b.sumGyro(gyro); 
+      b.sumGyroPrint();
+      Serial.print(float(pTime)/1000,3); 
+      Serial.println();
+    }
+    
+    //*******************************************************************************
+    // TODO: self calibration when a = 9.8 for gyros
+    //*******************************************************************************
+  }else{
+    Serial.println("Waiting");
+  }
+  if(digitalRead(12)==HIGH){
+    b.runStop();
+  }
 }
 
 /*************************************************************************************************************/

@@ -16,8 +16,10 @@ class Bayne
   private:
     unsigned long _oldTime, _change;
     float _accel_old[15][3];
+    float _accel_smoothed[3];
     float _gyroSums[3];
     float _sumThreshold;
+    bool _collectData;
   public:
     Bayne();
     void i2cReadBytes(uint8_t i2c_address, uint8_t reg,uint8_t  *data,uint8_t len);
@@ -27,7 +29,10 @@ class Bayne
     void startMPU3050();
     unsigned long changeInTime(unsigned long newTime);
     void sumGyro(float *gyro);
-    void accelAvg(float *accel_smoothed, float *accel);
+    void accelAvg(float *accel);
     void sumGyroPrint();
+    void avgAccelPrint();
+    bool collectData();
+    void runStop();
 };
 #endif

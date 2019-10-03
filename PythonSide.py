@@ -16,16 +16,18 @@
 import serial										# Serial library
 import math											# Math library
 #from visual import *								# vpython library
+
 arduinoSerialData = serial.Serial('/dev/ttyACM0',115200)	
 
 t_i = 0.0		
 
 at_beginning = False								# used to clear buffers of old data 
 													# will be set to True if "0.0,0.0,0.0,0.0" string is received
+# print("stating data intake")
 
-for i in range(0,10000):								# for loop to limit time program runs
-		
-	myData = "0.0,0.0,0.0,0.0"						# initialize data string
+for i in range(0,1000):								# for loop to limit time program runs
+	# print("inside loop with count = ",i)	
+	myData = "0.0,0.0,0.0,0.0,0.0,0.0,0.0"			# initialize data string
 													
 	while (arduinoSerialData.inWaiting()==0):		# do nothing ...wait for data from Arduino (threading here??)
 		pass										
@@ -39,14 +41,19 @@ for i in range(0,10000):								# for loop to limit time program runs
 	except ValueError:
 		data_valid = False
 	else:
+		# print("     Stripping data stream")
 		myData = myData.strip()						# strip all non-character and white spaces from right side of myData
 		data = myData.split(",")					# Split data using "," as delimiter
-		if( len(data) != 4):						# check to see if 4 pieces of data were received
+		if( len(data) != 7):						# check to see if 4 pieces of data were received
 			data_valid = False
+			print("     There are not 7 pieces of data ")
 		else:
 			ax = 0.0									# convert data string into floats
 			ay = 0.0
 			az = 0.0
+			gx = 0.0
+			gy = 0.0
+			gz = 0.0
 			t = 0.0
 			
 			try:										# check to see if data is valid
@@ -64,8 +71,24 @@ for i in range(0,10000):								# for loop to limit time program runs
 			except ValueError:
 				data_valid = False
 				
+				
+			try:										# check to see if data is valid
+				gx = float(data[3])
+			except ValueError:
+				data_valid = False
+				
 			try:
-				t = float(data[3])
+				gy = float(data[4])
+			except ValueError:
+				data_valid = False
+				
+			try:
+				gz = float(data[5])
+			except ValueError:
+				data_valid = False				
+				
+			try:
+				t = float(data[6])
 			except ValueError:
 				data_valid = False	
 			
@@ -84,10 +107,10 @@ for i in range(0,10000):								# for loop to limit time program runs
 			#print("\n a =",ax/255*9.8," ",ay/255*9.8," ",az/255*9.8)			# display acceleration ax in N/kg as test
 																				# data not calibrated here
 																				# this will be done on arduino side
-			mag_a = ((ax/255*9.8)**2+(ay/255*9.8)**2+(az/255*9.8)**2)**(0.5)	# magnitude for angle calculations
+			mag_a = ((ax)**2+(ay)**2+(az)**2)**(0.5)	# magnitude for angle calculations
 			if (mag_a != 0):
-				angle_from_z_axis= math.acos((az/255*9.8)/mag_a)
-				mag_a_xy_plane = ((ax/255*9.8)**2+(ay/255*9.8)**2)**(0.5)		# magnitude in x-y plane only
+				angle_from_z_axis= math.acos((az)/mag_a)
+				mag_a_xy_plane = ((ax)**2+(ay)**2)**(0.5)		# magnitude in x-y plane only
 				
 				if (mag_a_xy_plane == 0):
 					angle_in_xy_plane = 0										# actually undefined but this will do
@@ -101,11 +124,10 @@ for i in range(0,10000):								# for loop to limit time program runs
 						angle_in_xy_plane = math.atan(ay/ax)
 			
 				
-				#print(" axy mag =",mag_a_xy_plane, " angle in x-y plane", angle_in_xy_plane*180/3.141592654)
-				if (mag_a > 10.3 or mag_a<9.3):
-					print("G = ", mag_a, " angle from vertical", angle_from_z_axis*180/3.141592654,"Moving")		# success! 9.8 to -9.8 for all three axiesprint("movement")
-				else:
-					print("G = ", mag_a, " angle from vertical", angle_from_z_axis*180/3.141592654)		# success! 9.8 to -9.8 for all three axiesprint("movement")
+				
+				print("G = ", mag_a, " angle from vertical", angle_from_z_axis*180/3.141592654, "ANgle in x-y plane", angle_in_xy_plane/3.141592654*180)		
+
+
 
 			
 																	

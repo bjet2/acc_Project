@@ -4,6 +4,9 @@
 /*************************************************************************************************************/
 // constructor for class
 Bayne::Bayne(){
+  pinMode(13,OUTPUT);
+  pinMode(12,INPUT);
+  _collectData = true;
   _oldTime = 0; 
   _change = 0;
   _sumThreshold=0.5; 
@@ -17,8 +20,22 @@ Bayne::Bayne(){
   }
   
 }
+
 /*************************************************************************************************************/
+void Bayne::runStop(){
+  _collectData = !_collectData;
+  delay(1000);
+}
+
+
+/*************************************************************************************************************/
+bool Bayne::collectData(){
+  return _collectData;
+}
+/*************************************************************************************************************/
+
 // method to read bytes of data into a matrix for manipulation
+
 void Bayne::i2cReadBytes(uint8_t i2c_address, uint8_t reg,uint8_t  *data,uint8_t len)
 {
   Wire.beginTransmission(i2c_address);
@@ -150,7 +167,7 @@ void Bayne::sumGyroPrint(){
 }
 
 /*************************************************************************************************************/
-void Bayne::accelAvg(float *accel_smoothed, float *accel){
+void Bayne::accelAvg(float *accel){
   // shift accel data into _accel_old. _accel_old[0][x] is new data
   float temp[3]= {0.0,0.0,0.0};
   for(int i=0;i<(15-1);i++){
@@ -166,6 +183,13 @@ void Bayne::accelAvg(float *accel_smoothed, float *accel){
     for(int i=0;i<15;i++){
       temp[j]=temp[j]+_accel_old[i][j];
     }
-    accel_smoothed[j] = temp[j]/15.0;
+    _accel_smoothed[j] = temp[j]/15.0;
   }    
+}
+/*************************************************************************************************************/
+void Bayne::avgAccelPrint(){
+  for(int i=0;i<3;i++){
+    Serial.print(_accel_smoothed[i]);Serial.print(",");
+    
+  }
 }

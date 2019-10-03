@@ -9,6 +9,8 @@
 
 #include "Bayne.h"
 #include <Wire.h>
+#include <SPI.h>
+#include <SD.h>
 
 const int chipSelect = 8;
 
@@ -27,7 +29,16 @@ void setup() {
   b.startADXL345();
   b.startMPU3050();
   
+  Serial.print("Initializing SD card...");
 
+  // see if the card is present and can be initialized:
+  if (!SD.begin(chipSelect)) {
+    Serial.println("Card failed, or not present");
+    // don't do anything more:
+    while (1);
+  }
+  Serial.println("card initialized.");
+  delay(1000);
   while(!b.collectData()){
     Serial.println("Waiting");
     if(digitalRead(6)==HIGH){
@@ -98,10 +109,7 @@ void loop() {
       b.avgAccelPrint();
       // calculate the sum of the gyro movement anf print this
       b.sumGyro(gyro); 
-      //b.sumGyroPrint();
-      for(int i=0;i<3;i++){
-        Serial.print(gyro[i]);Serial.print(",");
-      }
+      b.sumGyroPrint();
       //Serial.print(float(pTime)/1000,3); 
       Serial.println();
     }
